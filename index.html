@@ -39,8 +39,8 @@ body{background:#c9c5c0;font-family:-apple-system,system-ui,sans-serif;display:f
 .pillwrap{text-align:center}
 .pill{width:54px;height:14px;border-radius:7px;background:#8b8a8f;transform:rotate(-20deg)}
 .pillwrap div:last-child{font-size:10px;color:#5f5e5a;margin-top:6px;letter-spacing:1px}
-#hint{position:fixed;left:0;right:0;bottom:0;background:#0f380f;color:#9bbc0f;font-size:13px;text-align:center;
-  padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);display:none}
+#hint{position:fixed;left:0;right:0;bottom:0;background:rgba(15,56,15,.92);color:#9bbc0f;font-size:11px;text-align:center;
+  padding:5px 12px calc(env(safe-area-inset-bottom)/2 + 5px);display:none;transition:opacity .6s;pointer-events:none}
 </style>
 </head>
 <body>
@@ -145,7 +145,7 @@ document.addEventListener('gesturestart',e=>e.preventDefault());
 function fit(){const availW=Math.min(window.innerWidth-44,480);const availH=window.innerHeight-340;let w=Math.min(availW,Math.max(220,availH*160/144));C.style.width=w+'px';C.style.height=(w*144/160)+'px'}
 window.addEventListener('resize',fit);fit();
 document.getElementById('led').style.background='#d6304a';
-if(!window.navigator.standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)){document.getElementById('hint').style.display='block'}
+if(!window.navigator.standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)){const h=document.getElementById('hint');h.style.display='block';setTimeout(function(){h.style.opacity='0';setTimeout(function(){h.style.display='none'},700)},6000)}
 if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 requestAnimationFrame(loop);
 </script>
