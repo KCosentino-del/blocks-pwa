@@ -94,8 +94,8 @@ const FNT={'0':[7,5,5,5,7],'1':[2,6,2,2,7],'2':[7,1,7,4,7],'3':[7,1,3,1,7],'4':[
 function txt(s,x,y,c,sc){c=c==null?3:c;sc=sc||1;X.fillStyle=PAL[c];for(let i=0;i<s.length;i++){const g=FNT[s[i]]||FNT[' '];for(let r=0;r<5;r++)for(let b=0;b<3;b++)if(g[r]&(4>>b))X.fillRect(x+i*4*sc+b*sc,y+r*sc,sc,sc)}}
 const FR=[53,49,45,41,37,33,28,22,17,11,10,9,8,7,6,6,5,5,4,4,3];
 let board,cur,nxt,score,lines,level,state='title',dropAt=0,held={l:0,r:0,d:0},clearAnim=null,curtain=0,mute=false,AC=null;
-let top=0;try{top=+localStorage.getItem('blocks-top')||0}catch(e){}
-function saveTop(){try{localStorage.setItem('blocks-top',String(top))}catch(e){}}
+let hiScore=0;try{hiScore=+localStorage.getItem('blocks-top')||0}catch(e){}
+function saveTop(){try{localStorage.setItem('blocks-top',String(hiScore))}catch(e){}}
 function sfx(f,d,v){if(mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const o=AC.createOscillator(),g=AC.createGain();o.type='square';o.frequency.value=f;g.gain.value=v||0.04;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
 function speed(){return FR[Math.min(level,20)]*16.7}
 function fits(t,r,x,y){for(const[cx,cy]of SH[t][r]){const bx=x+cx,by=y+cy;if(bx<0||bx>9||by>17)return false;if(by>=0&&board[by][bx])return false}return true}
@@ -107,7 +107,7 @@ function rot(d){if(state!=='play'||clearAnim)return;const n=SH[cur.t].length,nr=
 function lock(){let dead=false;for(const[cx,cy]of SH[cur.t][cur.r]){const by=cur.y+cy;if(by<0){dead=true;continue}board[by][cur.x+cx]=PIECEPAT[cur.t]}sfx(200,0.05);const full=[];for(let y=0;y<18;y++)if(board[y].every(v=>v))full.push(y);
 if(dead){state='curtain';curtain=0;sfx(110,0.6);return}
 if(full.length){clearAnim={rows:full,t:performance.now()};sfx(1040,0.12);sfx(1240,0.18)}else spawn()}
-function finishClear(){const rows=clearAnim.rows;clearAnim=null;for(const r of rows){board.splice(r,1);board.unshift(Array(10).fill(0))}score+=[0,40,100,300,1200][rows.length]*(level+1);lines+=rows.length;level=Math.floor(lines/10);if(score>top){top=score;saveTop()}spawn()}
+function finishClear(){const rows=clearAnim.rows;clearAnim=null;for(const r of rows){board.splice(r,1);board.unshift(Array(10).fill(0))}score+=[0,40,100,300,1200][rows.length]*(level+1);lines+=rows.length;level=Math.floor(lines/10);if(score>hiScore){hiScore=score;saveTop()}spawn()}
 function step(){if(fits(cur.t,cur.r,cur.x,cur.y+1)){cur.y++}else lock();dropAt=performance.now()+speed()}
 function hard(){if(state!=='play'||clearAnim)return;while(fits(cur.t,cur.r,cur.x,cur.y+1)){cur.y++;score++}lock();dropAt=performance.now()+speed()}
 function draw(t){X.fillStyle=PAL[0];X.fillRect(0,0,160,144);
@@ -117,7 +117,7 @@ txt('LEVEL',100,30);txt(String(level),158-String(level).length*4,38);
 txt('LINES',100,54);txt(String(lines),158-String(lines).length*4,62);
 txt('NEXT',100,78);
 X.fillStyle=PAL[3];X.fillRect(110,88,40,1);X.fillRect(110,127,40,1);X.fillRect(110,88,1,40);X.fillRect(149,88,1,40);
-if(state==='title'){txt('BLOCKS',8+(80-44)/2,40,3,2);txt('TOP',32,70);txt(String(top),64-String(top).length*4,78);if(Math.floor(t/500)%2){txt('PRESS',28,100);txt('START',28,108)}return}
+if(state==='title'){txt('BLOCKS',8+(80-44)/2,40,3,2);txt('TOP',32,70);txt(String(hiScore),64-String(hiScore).length*4,78);if(Math.floor(t/500)%2){txt('PRESS',28,100);txt('START',28,108)}return}
 if(nxt){const cells=SH[nxt][0],xs=cells.map(c=>c[0]),ys=cells.map(c=>c[1]);const w=(Math.max.apply(null,xs)-Math.min.apply(null,xs)+1)*8,h=(Math.max.apply(null,ys)-Math.min.apply(null,ys)+1)*8;const ox=110+Math.round((40-w)/2)-Math.min.apply(null,xs)*8,oy=88+Math.round((40-h)/2)-Math.min.apply(null,ys)*8;for(const[cx,cy]of cells)X.drawImage(PT[PIECEPAT[nxt]],ox+cx*8,oy+cy*8)}
 if(state==='pause'){txt('PAUSE',8+(80-20)/2,66);return}
 for(let y=0;y<18;y++)for(let x=0;x<10;x++)if(board[y][x]){if(clearAnim&&clearAnim.rows.indexOf(y)>=0&&Math.floor((t-clearAnim.t)/80)%2)continue;X.drawImage(PT[board[y][x]],8+x*8,y*8)}
