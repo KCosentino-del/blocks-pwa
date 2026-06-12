@@ -16,7 +16,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{background:#c9c5c0;font-family:-apple-system,system-ui,sans-serif;display:flex;flex-direction:column;
-  padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 10px);
+  padding:calc(env(safe-area-inset-top) + 72px) 10px calc(env(safe-area-inset-bottom) + 10px);
   height:100dvh;touch-action:none}
 #bezel{background:#54535c;border-radius:10px 10px 34px 10px;padding:10px 10px 14px;margin:0 auto;flex-shrink:0;width:-webkit-fit-content;width:fit-content}
 #bezeltop{display:flex;align-items:center;gap:10px;margin-bottom:8px}
@@ -142,7 +142,7 @@ window.addEventListener('keydown',e=>{const m={ArrowLeft:'l',ArrowRight:'r',Arro
 window.addEventListener('keyup',e=>{const m={ArrowLeft:'l',ArrowRight:'r',ArrowDown:'d'};if(m[e.key])release(m[e.key])});
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault());
-function fit(){const availW=Math.min(window.innerWidth-44,480);const availH=window.innerHeight-340;let w=Math.min(availW,Math.max(220,availH*160/144));C.style.width=w+'px';C.style.height=(w*144/160)+'px'}
+function fit(){const availW=Math.min(window.innerWidth-44,480);const availH=window.innerHeight-404;let w=Math.min(availW,Math.max(220,availH*160/144));C.style.width=w+'px';C.style.height=(w*144/160)+'px'}
 window.addEventListener('resize',fit);fit();
 document.getElementById('led').style.background='#d6304a';
 if(!window.navigator.standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)){const h=document.getElementById('hint');h.style.display='block';setTimeout(function(){h.style.opacity='0';setTimeout(function(){h.style.display='none'},700)},6000)}
