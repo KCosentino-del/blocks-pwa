@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Blocks</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Blocks">
+<meta name="theme-color" content="#c9c5c0">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:#c9c5c0;font-family:-apple-system,system-ui,sans-serif;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 10px);
+  height:100dvh;touch-action:none}
+#bezel{background:#54535c;border-radius:10px 10px 34px 10px;padding:10px 10px 14px;margin:0 auto;flex-shrink:0;width:-webkit-fit-content;width:fit-content}
+#bezeltop{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+#bezeltop .lbl{font-size:10px;letter-spacing:1px;color:#c9c5c0;font-weight:500;white-space:nowrap;flex:1;text-align:center}
+#pwr{display:flex;align-items:center;gap:5px;flex-shrink:0}
+#led{width:8px;height:8px;border-radius:50%;background:#5a2030}
+#pwr span{font-size:9px;color:#c9c5c0}
+#gb{display:block;image-rendering:pixelated;background:#9bbc0f}
+#brand{text-align:center;margin:8px 0 4px;font-size:13px;font-style:italic;font-weight:600;color:#2b3a8c;flex-shrink:0}
+#brand b{color:#8c2b5a;font-weight:600}
+#controls{flex:1;display:flex;flex-direction:column;justify-content:flex-end;max-width:420px;width:100%;margin:0 auto}
+#padrow{display:flex;justify-content:space-between;align-items:center}
+#dpad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px)}
+.gbbtn{border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:none;padding:0;font-family:inherit}
+.gbbtn:active{filter:brightness(.8)}
+.dk{background:#3a393e;color:#c9c5c0;font-size:20px;line-height:1}
+#ab{display:flex;gap:16px;align-items:flex-end;transform:rotate(-20deg)}
+.ab{width:60px;height:60px;border-radius:50%;background:#a83a6b;color:#f5dce8;font-size:18px;font-weight:600}
+#pillrow{display:flex;justify-content:center;gap:26px;margin-top:18px}
+.pillwrap{text-align:center}
+.pill{width:54px;height:14px;border-radius:7px;background:#8b8a8f;transform:rotate(-20deg)}
+.pillwrap div:last-child{font-size:10px;color:#5f5e5a;margin-top:6px;letter-spacing:1px}
+#hint{position:fixed;left:0;right:0;bottom:0;background:#0f380f;color:#9bbc0f;font-size:13px;text-align:center;
+  padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);display:none}
+</style>
+</head>
+<body>
+<div id="bezel">
+  <div id="bezeltop">
+    <div id="pwr"><div id="led"></div><span>PWR</span></div>
+    <span class="lbl">DOT MATRIX WITH STEREO SOUND</span>
+    <div style="width:34px;flex-shrink:0"></div>
+  </div>
+  <canvas id="gb" width="160" height="144"></canvas>
+</div>
+<div id="brand">Claude boy <b>&middot;</b> blocks</div>
+<div id="controls">
+  <div id="padrow">
+    <div id="dpad">
+      <span></span><button class="gbbtn dk" data-k="u" aria-label="Rotate" style="border-radius:8px 8px 0 0">&#9650;</button><span></span>
+      <button class="gbbtn dk" data-k="l" aria-label="Move left" style="border-radius:8px 0 0 8px">&#9664;</button><button class="gbbtn dk" data-k="hd" aria-label="Hard drop"><span style="display:block;width:14px;height:14px;border-radius:50%;background:#2c2b30;margin:0 auto"></span></button><button class="gbbtn dk" data-k="r" aria-label="Move right" style="border-radius:0 8px 8px 0">&#9654;</button>
+      <span></span><button class="gbbtn dk" data-k="d" aria-label="Soft drop" style="border-radius:0 0 8px 8px">&#9660;</button><span></span>
+    </div>
+    <div id="ab">
+      <button class="gbbtn ab" data-k="b" aria-label="Rotate counter-clockwise">B</button>
+      <button class="gbbtn ab" data-k="a" aria-label="Rotate clockwise" style="margin-bottom:16px">A</button>
+    </div>
+  </div>
+  <div id="pillrow">
+    <div class="pillwrap"><button class="gbbtn pill" data-k="sel" aria-label="Toggle sound"></button><div>SELECT</div></div>
+    <div class="pillwrap"><button class="gbbtn pill" data-k="st" aria-label="Start or pause"></button><div>START</div></div>
+  </div>
+</div>
+<div id="hint">Install: tap Share, then "Add to Home Screen"</div>
+<script>
+const C=document.getElementById('gb'),X=C.getContext('2d');
+const PAL=['#9bbc0f','#8bac0f','#306230','#0f380f'];
+function mk(rows){const c=document.createElement('canvas');c.width=8;c.height=8;const g=c.getContext('2d');for(let y=0;y<8;y++)for(let x=0;x<8;x++){g.fillStyle=PAL[+rows[y][x]];g.fillRect(x,y,1,1)}return c}
+const PA=mk(["33333333","31111113","31222213","31222213","31222213","31222213","31111113","33333333"]);
+const PB=mk(["33333333","30000003","30222203","30211203","30211203","30222203","30000003","33333333"]);
+const PC=mk(["33333333","32222223","32000023","32011023","32011023","32000023","32222223","33333333"]);
+const PW=mk(["32323232","23232323","32323232","23232323","32323232","23232323","32323232","23232323"]);
+const PT={A:PA,B:PB,C:PC};
+const PIECEPAT={I:'A',O:'A',T:'B',J:'B',S:'C',Z:'C',L:'C'};
+const SH={
+I:[[[0,1],[1,1],[2,1],[3,1]],[[2,0],[2,1],[2,2],[2,3]]],
+O:[[[1,0],[2,0],[1,1],[2,1]]],
+T:[[[0,1],[1,1],[2,1],[1,2]],[[1,0],[0,1],[1,1],[1,2]],[[1,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[2,1],[1,2]]],
+S:[[[1,1],[2,1],[0,2],[1,2]],[[1,0],[1,1],[2,1],[2,2]]],
+Z:[[[0,1],[1,1],[1,2],[2,2]],[[2,0],[1,1],[2,1],[1,2]]],
+J:[[[0,1],[1,1],[2,1],[2,2]],[[1,0],[1,1],[0,2],[1,2]],[[0,0],[0,1],[1,1],[2,1]],[[1,0],[2,0],[1,1],[1,2]]],
+L:[[[0,1],[1,1],[2,1],[0,2]],[[0,0],[1,0],[1,1],[1,2]],[[2,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[1,2],[2,2]]]};
+const KINDS=Object.keys(SH);
+const FNT={'0':[7,5,5,5,7],'1':[2,6,2,2,7],'2':[7,1,7,4,7],'3':[7,1,3,1,7],'4':[5,5,7,1,1],'5':[7,4,7,1,7],'6':[7,4,7,5,7],'7':[7,1,1,1,1],'8':[7,5,7,5,7],'9':[7,5,7,1,7],A:[7,5,7,5,5],B:[6,5,6,5,6],C:[7,4,4,4,7],D:[6,5,5,5,6],E:[7,4,7,4,7],G:[7,4,5,5,7],I:[7,2,2,2,7],K:[5,5,6,5,5],L:[4,4,4,4,7],M:[5,7,5,5,5],N:[6,5,5,5,5],O:[7,5,5,5,7],P:[7,5,7,4,4],R:[7,5,7,6,5],S:[7,4,7,1,7],T:[7,2,2,2,2],U:[5,5,5,5,7],V:[5,5,5,5,2],X:[5,5,2,5,5],' ':[0,0,0,0,0]};
+function txt(s,x,y,c,sc){c=c==null?3:c;sc=sc||1;X.fillStyle=PAL[c];for(let i=0;i<s.length;i++){const g=FNT[s[i]]||FNT[' '];for(let r=0;r<5;r++)for(let b=0;b<3;b++)if(g[r]&(4>>b))X.fillRect(x+i*4*sc+b*sc,y+r*sc,sc,sc)}}
+const FR=[53,49,45,41,37,33,28,22,17,11,10,9,8,7,6,6,5,5,4,4,3];
+let board,cur,nxt,score,lines,level,state='title',dropAt=0,held={l:0,r:0,d:0},clearAnim=null,curtain=0,mute=false,AC=null;
+let top=0;try{top=+localStorage.getItem('blocks-top')||0}catch(e){}
+function saveTop(){try{localStorage.setItem('blocks-top',String(top))}catch(e){}}
+function sfx(f,d,v){if(mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const o=AC.createOscillator(),g=AC.createGain();o.type='square';o.frequency.value=f;g.gain.value=v||0.04;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+function speed(){return FR[Math.min(level,20)]*16.7}
+function fits(t,r,x,y){for(const[cx,cy]of SH[t][r]){const bx=x+cx,by=y+cy;if(bx<0||bx>9||by>17)return false;if(by>=0&&board[by][bx])return false}return true}
+function rnd(){return KINDS[Math.floor(Math.random()*KINDS.length)]}
+function spawn(){const t=nxt;nxt=rnd();const ys=SH[t][0].map(c=>c[1]);const y=-Math.min.apply(null,ys);cur={t:t,r:0,x:3,y:y};if(!fits(t,0,3,y)){state='curtain';curtain=0;sfx(110,0.6);return}dropAt=performance.now()+speed()}
+function startGame(){board=Array.from({length:18},()=>Array(10).fill(0));score=0;lines=0;level=0;clearAnim=null;nxt=rnd();state='play';spawn();sfx(880,0.08)}
+function move(dx){if(state!=='play'||clearAnim)return;if(fits(cur.t,cur.r,cur.x+dx,cur.y)){cur.x+=dx;sfx(520,0.02,0.02)}}
+function rot(d){if(state!=='play'||clearAnim)return;const n=SH[cur.t].length,nr=(cur.r+d+n)%n;if(fits(cur.t,nr,cur.x,cur.y)){cur.r=nr;sfx(760,0.03)}}
+function lock(){let dead=false;for(const[cx,cy]of SH[cur.t][cur.r]){const by=cur.y+cy;if(by<0){dead=true;continue}board[by][cur.x+cx]=PIECEPAT[cur.t]}sfx(200,0.05);const full=[];for(let y=0;y<18;y++)if(board[y].every(v=>v))full.push(y);
+if(dead){state='curtain';curtain=0;sfx(110,0.6);return}
+if(full.length){clearAnim={rows:full,t:performance.now()};sfx(1040,0.12);sfx(1240,0.18)}else spawn()}
+function finishClear(){const rows=clearAnim.rows;clearAnim=null;for(const r of rows){board.splice(r,1);board.unshift(Array(10).fill(0))}score+=[0,40,100,300,1200][rows.length]*(level+1);lines+=rows.length;level=Math.floor(lines/10);if(score>top){top=score;saveTop()}spawn()}
+function step(){if(fits(cur.t,cur.r,cur.x,cur.y+1)){cur.y++}else lock();dropAt=performance.now()+speed()}
+function hard(){if(state!=='play'||clearAnim)return;while(fits(cur.t,cur.r,cur.x,cur.y+1)){cur.y++;score++}lock();dropAt=performance.now()+speed()}
+function draw(t){X.fillStyle=PAL[0];X.fillRect(0,0,160,144);
+for(let ty=0;ty<18;ty++){X.drawImage(PW,0,ty*8);X.drawImage(PW,88,ty*8)}
+txt('SCORE',100,6);txt(String(score).slice(0,7),158-Math.min(String(score).length,7)*4,14);
+txt('LEVEL',100,30);txt(String(level),158-String(level).length*4,38);
+txt('LINES',100,54);txt(String(lines),158-String(lines).length*4,62);
+txt('NEXT',100,78);
+X.fillStyle=PAL[3];X.fillRect(110,88,40,1);X.fillRect(110,127,40,1);X.fillRect(110,88,1,40);X.fillRect(149,88,1,40);
+if(state==='title'){txt('BLOCKS',8+(80-44)/2,40,3,2);txt('TOP',32,70);txt(String(top),64-String(top).length*4,78);if(Math.floor(t/500)%2){txt('PRESS',28,100);txt('START',28,108)}return}
+if(nxt){const cells=SH[nxt][0],xs=cells.map(c=>c[0]),ys=cells.map(c=>c[1]);const w=(Math.max.apply(null,xs)-Math.min.apply(null,xs)+1)*8,h=(Math.max.apply(null,ys)-Math.min.apply(null,ys)+1)*8;const ox=110+Math.round((40-w)/2)-Math.min.apply(null,xs)*8,oy=88+Math.round((40-h)/2)-Math.min.apply(null,ys)*8;for(const[cx,cy]of cells)X.drawImage(PT[PIECEPAT[nxt]],ox+cx*8,oy+cy*8)}
+if(state==='pause'){txt('PAUSE',8+(80-20)/2,66);return}
+for(let y=0;y<18;y++)for(let x=0;x<10;x++)if(board[y][x]){if(clearAnim&&clearAnim.rows.indexOf(y)>=0&&Math.floor((t-clearAnim.t)/80)%2)continue;X.drawImage(PT[board[y][x]],8+x*8,y*8)}
+if(state==='play'&&cur&&!clearAnim)for(const[cx,cy]of SH[cur.t][cur.r]){const by=cur.y+cy;if(by>=0)X.drawImage(PT[PIECEPAT[cur.t]],8+(cur.x+cx)*8,by*8)}
+if(state==='curtain'||state==='over'){const n=state==='over'?18:Math.floor(curtain);for(let y=17;y>17-n&&y>=0;y--)for(let x=0;x<10;x++)X.drawImage(PA,8+x*8,y*8)}
+if(state==='over'){X.fillStyle=PAL[0];X.fillRect(14,52,68,40);txt('GAME',8+(80-16)/2,58);txt('OVER',8+(80-16)/2,66);if(Math.floor(t/500)%2){txt('PRESS',28,78);txt('START',28,86)}}}
+function loop(t){if(state==='play'&&!clearAnim){if(held.l&&t>held.l){move(-1);held.l=t+50}if(held.r&&t>held.r){move(1);held.r=t+50}if(held.d&&t>held.d){if(fits(cur.t,cur.r,cur.x,cur.y+1)){cur.y++;score++;dropAt=t+speed()}held.d=t+50}if(t>dropAt)step()}
+if(clearAnim&&t-clearAnim.t>320)finishClear();
+if(state==='curtain'){curtain+=0.45;if(curtain>=18)state='over'}
+draw(t);requestAnimationFrame(loop)}
+function startBtn(){if(state==='title'||state==='over')startGame();else if(state==='play'){state='pause';sfx(440,0.06)}else if(state==='pause'){state='play';dropAt=performance.now()+speed();sfx(660,0.06)}}
+function press(k){if(k==='st')return startBtn();if(k==='sel'){mute=!mute;document.getElementById('led').style.background=mute?'#5a2030':'#d6304a';return}
+if(state==='title'||state==='over'){if(k==='a'||k==='u')return startGame()}
+if(k==='l'){move(-1);held.l=performance.now()+170}else if(k==='r'){move(1);held.r=performance.now()+170}else if(k==='d'){held.d=performance.now()}else if(k==='a'||k==='u'){rot(1)}else if(k==='b'){rot(-1)}else if(k==='hd'){hard()}}
+function release(k){if(k==='l')held.l=0;if(k==='r')held.r=0;if(k==='d')held.d=0}
+document.querySelectorAll('.gbbtn').forEach(b=>{const k=b.dataset.k;b.addEventListener('pointerdown',e=>{e.preventDefault();press(k)});b.addEventListener('pointerup',()=>release(k));b.addEventListener('pointerleave',()=>release(k));b.addEventListener('pointercancel',()=>release(k))});
+window.addEventListener('keydown',e=>{const m={ArrowLeft:'l',ArrowRight:'r',ArrowDown:'d',ArrowUp:'a',x:'a',X:'a',z:'b',Z:'b',Enter:'st',p:'st',P:'st'};if(e.code==='Space'){e.preventDefault();if(!e.repeat){if(state==='play')hard();else startBtn()}return}const k=m[e.key];if(!k)return;e.preventDefault();if(e.repeat)return;press(k)});
+window.addEventListener('keyup',e=>{const m={ArrowLeft:'l',ArrowRight:'r',ArrowDown:'d'};if(m[e.key])release(m[e.key])});
+document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+function fit(){const availW=Math.min(window.innerWidth-44,480);const availH=window.innerHeight-340;let w=Math.min(availW,Math.max(220,availH*160/144));C.style.width=w+'px';C.style.height=(w*144/160)+'px'}
+window.addEventListener('resize',fit);fit();
+document.getElementById('led').style.background='#d6304a';
+if(!window.navigator.standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)){document.getElementById('hint').style.display='block'}
+if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
